@@ -15,7 +15,7 @@ aovMuiBoxP2(
 \arguments{
 \item{data}{a data.frame contain the input data}
 
-\item{i}{col index wtich need to test}
+\item{i}{for col id or colames}
 
 \item{sig_show}{Distinctive display, "abc" or "line"}
 
@@ -31,8 +31,8 @@ Variance test or non-parametric test results visualization, using boxplot paired
 }
 \examples{
 # data(data_wt)
-result = KwWlx(data = data_wt, i= 4)
-PlotresultBox = aovMuiBoxP(data = data_wt, i= 3,sig_show ="abc",result = result[[1]])
+result = KwWlx2(data = data_wt, i= 4)
+PlotresultBox = aovMuiBoxP2(data = data_wt, i= 4,sig_show ="abc",result = result[[1]])
 # utput result
 p = PlotresultBox[[1]]
 p

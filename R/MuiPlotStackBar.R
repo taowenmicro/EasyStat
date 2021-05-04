@@ -23,8 +23,9 @@
 MuiPlotStackBar <- function(data = data,i,result = result,errbar = TRUE,...){
 
   #-- data prepare
-  i = c(2,i)
-  data <- data[,i]
+  i = c("group",i)
+
+  data <- data[i]
   result$group = row.names(result)
   abc <- reshape2::melt(result, id="group", variable.name="variable", value.name = "abc")
 

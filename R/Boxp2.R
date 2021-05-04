@@ -1,14 +1,14 @@
 #' Variance test or non-parametric test results visualization, using boxplot paired line show pair com...
 #'
 #' @param data a data.frame contain the input data
-#' @param  i col index wtich need to test
+#' @param  i for col id or colames
 #' @param sig_show Distinctive display, "abc" or "line"
 #' @param result output from aovMcomper or KwWlx. You can also import result calculated from other software (a data frame)
 #' @param  ns Logical value, whether to display insignificant marks
 #' @examples
 #' # data(data_wt)
-#' result = KwWlx(data = data_wt, i= 4)
-#' PlotresultBox = aovMuiBoxP(data = data_wt, i= 3,sig_show ="abc",result = result[[1]])
+#' result = KwWlx2(data = data_wt, i= 4)
+#' PlotresultBox = aovMuiBoxP2(data = data_wt, i= 4,sig_show ="abc",result = result[[1]])
 #' # utput result
 #' p = PlotresultBox[[1]]
 #' p
@@ -26,7 +26,8 @@
 aovMuiBoxP2 = function(data = data_wt, i= 3,sig_show ="line",result = result,ns = FALSE){
   aa = result
   name_i = colnames(data[i])
-  data_box = data[c(1,2,i)]
+  data_box =   data %>%
+    dplyr::select(1,2,i)
   colnames(data_box) = c("ID" , "group","dd" )
 
 
@@ -69,8 +70,9 @@ aovMuiBoxP2 = function(data = data_wt, i= 3,sig_show ="line",result = result,ns 
 
 
   if (sig_show == "abc") {
+    tab.abc = data_box %>% distinct( group, .keep_all = TRUE)
     p = p +
-      geom_text(data=data_box, aes(x=group, y=y, color=group, label= stat))
+      geom_text(data=tab.abc, aes(x=group, y=y, color=group, label= stat))
 
     p
   }

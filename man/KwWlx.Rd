@@ -4,15 +4,17 @@
 \alias{KwWlx}
 \title{Easy for Non-parametric test}
 \usage{
-KwWlx(data = data_wt, i = 3)
+KwWlx(data = data_wt, i = 3, method = "wilcox.test")
 }
 \arguments{
 \item{data}{a data.frame contain the input data}
 
 \item{i}{col index wtich need to test}
+
+\item{method}{wilcox.test or t.test could be seleced.}
 }
 \value{
-data frame
+list with two data frame
 }
 \description{
 Easy for Non-parametric test

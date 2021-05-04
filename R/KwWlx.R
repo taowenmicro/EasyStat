@@ -2,11 +2,12 @@
 #'
 #' @param data a data.frame contain the input data
 #' @param  i col index wtich need to test
+#' @param method wilcox.test or t.test could be seleced.
 #' @examples
 #' # data(data_wt)
 #' result = KwWlx(data = data_wt, i= 4)
 #' result[[1]]
-#' @return data frame
+#' @return list with two data frame
 #' @author Contact: Tao Wen \email{2018203048@@njau.edu.cn} Jun Yuan \email{2018203048@@njau.edu.cn}
 #' @references
 #'
@@ -17,8 +18,8 @@
 
 
 #-------------------------------------------Non-parametric test-------------------------------
-KwWlx = function(data = data_wt, i= 3){
-# i = 17
+KwWlx = function(data = data_wt, i= 3,method = "wilcox.test"){
+
   ss <- data %>%
     dplyr::select("group",count = i)
 
@@ -29,7 +30,7 @@ KwWlx = function(data = data_wt, i= 3){
   sumkrusk=as.data.frame(krusk)
   sumkrusk
   #<0.05,It shows that there are differences between multiple groups, you can conduct pairwise non-parametric tests, and mark the letters
-  krusk <- ggpubr::compare_means(count ~ group, data=ss, method = "wilcox.test")
+  krusk <- ggpubr::compare_means(count ~ group, data=ss, method = method)
   xx=as.data.frame(krusk)
 
   #mean for order

@@ -18,6 +18,14 @@
 #' @export
 
 
+# if (is.numeric(i)) {
+#   ss <- data %>%
+#     dplyr::select("group",count = i)
+#
+# } else if (is.character(i)) {
+#   ss <- data %>%
+#     dplyr::select("group",count = i)
+# }
 
 aovMcomper = function( data = data_wt, i= 3,method_Mc = "Tukey"){
   ss <- data %>%

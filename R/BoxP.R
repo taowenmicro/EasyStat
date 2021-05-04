@@ -8,7 +8,7 @@
 #' @examples
 #' # data(data_wt)
 #' result = KwWlx(data = data_wt, i= 4)
-#' PlotresultBox = aovMuiBoxP(data = data_wt, i= 3,sig_show ="abc",result = result[[1]])
+#' PlotresultBox = aovMuiBoxP(data = data_wt, i= 4,sig_show ="abc",result = result[[1]])
 #' # utput result
 #' p = PlotresultBox[[1]]
 #' p
@@ -26,8 +26,10 @@
 aovMuiBoxP = function(data = data_wt, i= 3,sig_show ="line",result = result,ns = FALSE){
   aa = result
   name_i = colnames(data[i])
-  data_box = data[c(1,2,i)]
+  data_box =   data %>%
+    dplyr::select(1,2,i)
   colnames(data_box) = c("ID" , "group","dd" )
+
 
 
   data_box$stat=aa[as.character(data_box$group),]$groups
@@ -46,16 +48,18 @@ aovMuiBoxP = function(data = data_wt, i= 3,sig_show ="line",result = result,ns =
   data_box$y=y[as.character(data_box$group),]$Max + (max-min)*0.05
 
   head(data_box)
-  p = ggplot(data_box, aes(x=group, y=data_box[["dd"]], color=group)) +
+  p = ggplot(data_box, aes(x=group, y=.data[["dd"]], color=group)) +
     geom_boxplot(alpha=1, outlier.size=0, size=0.7, width=0.5, fill="transparent") +
     labs(
       y=name_i)+
     geom_jitter( position=position_jitter(0.17), size=1, alpha=0.7)+theme(legend.position="none")
 
-  p
+  head(data_box)
+
   if (sig_show == "abc") {
+    tab.abc = data_box %>% distinct( group, .keep_all = TRUE)
     p = p +
-      geom_text(data=data_box, aes(x=group, y=y, color=group, label= stat))
+      geom_text(data=tab.abc, aes(x=group, y=y, color=group, label= stat))
 
     p
   }

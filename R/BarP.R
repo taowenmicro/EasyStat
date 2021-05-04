@@ -8,7 +8,7 @@
 #' @examples
 #' # data(data_wt)
 #' result = KwWlx(data = data_wt, i= 4)
-#' PlotresultBar = aovMuiBarPlot(data = data_wt, i= 3,sig_show ="abc",result = result[[1]])
+#' PlotresultBar = aovMuiBarPlot(data = data_wt, i= 4,sig_show ="abc",result = result[[1]])
 #' # utput result
 #' PlotresultBar[[1]]
 #' @return list

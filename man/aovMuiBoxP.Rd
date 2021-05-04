@@ -32,7 +32,7 @@ Variance test or non-parametric test results visualization, using boxplot
 \examples{
 # data(data_wt)
 result = KwWlx(data = data_wt, i= 4)
-PlotresultBox = aovMuiBoxP(data = data_wt, i= 3,sig_show ="abc",result = result[[1]])
+PlotresultBox = aovMuiBoxP(data = data_wt, i= 4,sig_show ="abc",result = result[[1]])
 # utput result
 p = PlotresultBox[[1]]
 p

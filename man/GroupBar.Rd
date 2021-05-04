@@ -32,7 +32,7 @@ Variance test or non-parametric test results visualization, using boxbar
 \examples{
 # data(data_wt)
 result = MuiKwWlx(data = data_wt,num = c(4:6))
-result = GroupBar(data = data_wt,num = c(4:6),result = result,sig_show ="abc",ncol = 2 )
+result = GroupBar(data = data_wt,num = c(4:6),result = result,sig_show ="abc")
 # output result
 result[[1]]
 
