@@ -17,11 +17,11 @@
 
 
 #Multi-group data for non-parametric test
-MuiKwWlx2 = function(data = data_wt,num = c(4:6)){
+MuiKwWlxPair = function(data = data_wt,num = c(4:6)){
   N = num[1]
 
   data_wt = data
-  result = KwWlx2(data = data_wt, i= N,paired = TRUE)
+  result = KwWlxPair(data = data_wt, i= N,paired = TRUE)
   aa = result[[1]]
   name = colnames(data_wt[N])
 
@@ -30,7 +30,7 @@ MuiKwWlx2 = function(data = data_wt,num = c(4:6)){
   A = aa
 
   for (N in num[-1]) {
-    result = KwWlx2(data = data_wt, i= N,paired = TRUE)
+    result = KwWlxpair(data = data_wt, i= N,paired = TRUE)
     aa = result[[1]]
     name = colnames(data_wt[N])
 

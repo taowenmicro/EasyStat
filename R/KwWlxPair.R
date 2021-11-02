@@ -19,7 +19,7 @@
 
 
 #-------------------------------------------Non-parametric test-------------------------------
-KwWlx2 = function(data = data_wt, i= 3,method = "wilcox.test",paired = FALSE){
+KwWlxPair = function(data = data_wt, i= 3,method = "wilcox.test",paired = FALSE){
   # i = 17
   ss <- data %>%
     dplyr::select("group",count = i)
@@ -57,8 +57,20 @@ KwWlx2 = function(data = data_wt, i= 3,method = "wilcox.test",paired = FALSE){
   aa = wilcox.labels
   aa$group = row.names(aa)
   aa
-  aa =ord_sig(data = aa,ID = "groups")
-
+  # aa =ord_sig(data = aa,ID = "groups")
+  dat <- ss %>% group_by(group) %>%
+    summarise(mean = mean(count)) %>%
+    inner_join(as_tibble(aa),by = c("group" = "group")) %>%
+    arrange(desc(mean))
+  tmp.1 <- dat$groups %>% unique()
+  tmp.2 <- data.frame(ori = sort(tmp.1,decreasing =TRUE),new = sort(tmp.1,decreasing =FALSE))
+  i = 1
+  for (i in 1:nrow(dat)) {
+    dat[i,3] <- tmp.2$new[match(dat[i,3],tmp.2$ori)]
+  }
+  dat$mean = NULL
+  dat = dat[match(dat$group,aa$group),][,c(2,1)] %>% as.data.frame()
+  row.names(dat) = dat$group
 
   return(list(aa,wilcox = krusk,kruskal = sumkrusk))
 }

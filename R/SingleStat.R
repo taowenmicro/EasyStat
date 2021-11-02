@@ -31,11 +31,11 @@ SingleStat = function(data = data_wt,plot = "bar",method_Mc = "Tukey",i= 4,sig_s
 
 
   if (p1!= 0& p2 >.05) {
-    result= aovMcomper (data = data, i= i,method_Mc = "Tukey")
+    result= aovMcomper2 (data = data, i= i,method_Mc = "Tukey")
     A = print("aov")
     A
   } else if (p1  != 0| p2 <.05){
-    result = KwWlx(data = data, i= i)
+    result = KwWlx2(data = data, i= i)
     A = print("wlx")
     A
   }
@@ -45,7 +45,7 @@ SingleStat = function(data = data_wt,plot = "bar",method_Mc = "Tukey",i= 4,sig_s
     p = PlotresultBar[[1]]
 
   } else if (plot == "box"){
-    PlotresultBox = aovMuiBoxP(data = data, i= i,sig_show =sig_show,result = result[[1]])
+    PlotresultBox = aovMuiBoxP2(data = data, i= i,sig_show =sig_show,result = result[[1]])
     p = PlotresultBox[[1]]
 
   }else if (plot == "boxbar"){

@@ -23,7 +23,7 @@
 MuiPlotStackBar <- function(data = data,i,result = result,errbar = TRUE,...){
 
   #-- data prepare
-  i = c("group",i)
+  i = c(2,i)
 
   data <- data[i]
   result$group = row.names(result)

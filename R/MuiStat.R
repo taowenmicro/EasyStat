@@ -52,8 +52,8 @@ MuiStat = function(data = data_wt,num = c(4,5,6),method_cv = "leveneTest",method
 
 
 
-  resultAA = MuiaovMcomper(data = data,num = AA,method_Mc = method_Mc )
-  resultBB = MuiKwWlx(data = data,num = BB)
+  resultAA = MuiaovMcomper2(data = data,num = AA,method_Mc = method_Mc )
+  resultBB = MuiKwWlx2(data = data,num = BB)
   resultall = cbind(resultAA,resultBB)
   num = c(AA,BB)
   if (plottype == "single") {

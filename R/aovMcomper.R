@@ -91,3 +91,6 @@ aovMcomper = function( data = data_wt, i= 3,method_Mc = "Tukey"){
   # aa =ord_sig(data = aa,ID = "groups")
   return(list(Muicomper = aa,model))
 }
+
+
+
