@@ -4,7 +4,7 @@
 #' @param num index col which need plot
 #' @examples
 #' # data(data_wt)
-#'  result = MuiKwWlx2(data = data_wt,num = c(4:6))
+#'  result = MuiKwWlxPair(data = data_wt,num = c(4:6))
 #' result
 #' @return data frame
 #' @author Contact: Tao Wen \email{2018203048@@njau.edu.cn} Jun Yuan \email{junyuan@@njau.edu.cn}
@@ -19,7 +19,6 @@
 #Multi-group data for non-parametric test
 MuiKwWlxPair = function(data = data_wt,num = c(4:6)){
   N = num[1]
-
   data_wt = data
   result = KwWlxPair(data = data_wt, i= N,paired = TRUE)
   aa = result[[1]]
@@ -30,7 +29,7 @@ MuiKwWlxPair = function(data = data_wt,num = c(4:6)){
   A = aa
 
   for (N in num[-1]) {
-    result = KwWlxpair(data = data_wt, i= N,paired = TRUE)
+    result = KwWlxPair(data = data_wt, i= N,paired = TRUE)
     aa = result[[1]]
     name = colnames(data_wt[N])
 
