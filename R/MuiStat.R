@@ -50,11 +50,31 @@ MuiStat = function(data = data_wt,num = c(4,5,6),method_cv = "leveneTest",method
 
   }
 
+  if (!is.null(AA)) {
+    resultAA = MuiaovMcomper2(data = data,num = AA,method_Mc = method_Mc )
+  } else if(is.null(AA)){
+    resultAA = NULL
 
+  }
 
-  resultAA = MuiaovMcomper2(data = data,num = AA,method_Mc = method_Mc )
+  if(!is.null(BB)){
   resultBB = MuiKwWlx2(data = data,num = BB)
-  resultall = cbind(resultAA,resultBB)
+  } else if(is.null(BB)){
+    resultBB = NULL
+
+  }
+
+  if (!is.null(AA) & !is.null(BB)) {
+    resultall = cbind(resultAA,resultBB)
+  } else if (is.null(AA)) {
+    resultall = cbind(resultBB)
+  } else if (is.null(BB)) {
+    resultall = cbind(resultAA)
+  }
+
+
+
+
   num = c(AA,BB)
   if (plottype == "single") {
     if (plot == "bar") {
