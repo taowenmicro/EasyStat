@@ -61,7 +61,6 @@ aovMcomper2 = function( data = data_wt, i= 3,method_Mc = "Tukey"){
   if (method_Mc == "SNK") {
     out <- agricolae::SNK.test(model,"group")
     aa = out$groups# View label of each group
-
     aa$group = row.names(aa)
     stat = aa
     aa = aa[2:3]
@@ -88,9 +87,9 @@ aovMcomper2 = function( data = data_wt, i= 3,method_Mc = "Tukey"){
   }
 
   dat <- ss %>% group_by(group) %>%
-    summarise(mean = mean(count)) %>%
-    inner_join(as_tibble(aa),by = c("group" = "group")) %>%
-    arrange(desc(mean))
+    dplyr::summarise(mean = mean(count)) %>%
+    dplyr::inner_join(as_tibble(aa),by = c("group" = "group")) %>%
+    dplyr::arrange(desc(mean))
   tmp.1 <- dat$groups %>% unique()
   tmp.2 <- data.frame(ori = tmp.1,new = sort(tmp.1,decreasing = FALSE))
   i = 1
@@ -161,9 +160,9 @@ KwWlx2 = function(data = data_wt, i= 3,method = "wilcox.test"){
   aa$group = row.names(aa)
   # aa =ord_sig(data = aa,ID = "groups")
   dat <- ss %>% group_by(group) %>%
-    summarise(mean = mean(count)) %>%
-    inner_join(as_tibble(aa),by = c("group" = "group")) %>%
-    arrange(desc(mean))
+    dplyr::summarise(mean = mean(count)) %>%
+    dplyr::inner_join(as_tibble(aa),by = c("group" = "group")) %>%
+    dplyr::arrange(desc(mean))
   tmp.1 <- dat$groups %>% unique()
   tmp.2 <- data.frame(ori = tmp.1,new = sort(tmp.1,decreasing = FALSE))
   i = 1
@@ -197,8 +196,8 @@ KwWlx2 = function(data = data_wt, i= 3,method = "wilcox.test"){
 #' @export
 
 MuiaovMcomper2 = function(data = data_wt,num = c(4:6),method_Mc = "Tukey"){
+  data$group = as.factor(data$group)
   N = num[1]
-
   result = aovMcomper2 (data = data, i= N,method_Mc = method_Mc)
   aa = result[[1]]
   name = colnames(data[N])
@@ -271,3 +270,15 @@ MuiKwWlx2 = function(data = data_wt,num = c(4:6)){
   return(A)
 
 }
+
+
+
+
+
+
+
+
+
+
+
+

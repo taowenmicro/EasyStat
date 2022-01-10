@@ -19,7 +19,7 @@ Multi-group data for non-parametric test paired show...
 }
 \examples{
 # data(data_wt)
- result = MuiKwWlx2(data = data_wt,num = c(4:6))
+ result = MuiKwWlxPair(data = data_wt,num = c(4:6))
 result
 }
 \references{

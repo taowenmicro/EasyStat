@@ -18,6 +18,7 @@ Imports:
 	ggpubr,
 	multcompView,
 	reshape2,
-	plyr
+	plyr,
+	aplot
 URL: https://github.com/taowenmicro/EasyStat
 BugReports: https://github.com/taowenmicro/EasyStat/issues
