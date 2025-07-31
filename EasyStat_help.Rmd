@@ -1,0 +1,794 @@
+---
+title: "EasyStat_help"
+author: "wentao"
+date: "2020/6/13"
+output: html_document
+---
+```{css include=FALSE}
+ pre code,pre,code {
+ white-space:pre!important;
+ overflow-x: scroll!important; 
+} 
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      fig.width = 12,
+                      fig.height = 5,
+                      fig.align = "center",
+                      warning = FALSE,
+                      message = FALSE
+                      
+                      )
+```
+
+# 差异分析完整解决方案
+
+2020年11月更新：
+- 将ord_sig函数内置到差异分析中，改变水平排布顺序，更加符合常规认识。,单个指标方差检验和非参数检验已完成
+- KwWlx分参数检验字母标记混乱问题修正。
+
+
+本次更新：2020年7月
+
+- 修改整个R包，包括包名；安装EasyStat包，本次安装包只要你可以用下载，应该可以安装成功。因为我已经将全部的依赖都写好了.
+- 增加多组展示同一张图的可视化方式。
+- 修改字母标记无法显示完整问题
+- 增加line展示差异ns是否显示的参数。
+- 增加线柱图展示。参考（NBT线虫工程菌）。
+
+
+
+## EasyStat 使用指南
+
+
+
+
+```{R eval=FALSE, include=FALSE}
+library(devtools)
+remotes::install_github("taowenmicro/EasyStat")
+# 如果国外不可用，则使用国内码云安装
+remotes::install_git('https://gitee.com/wentaomicro/EasyStat')
+```
+
+导入包和数据，数据均来自真实试验和文公开文献下载，通过调整分组加入。
+
+```{R}
+# 导入差异分析包
+library(EasyStat)
+library(ggplot2)# 用于作图
+library("dplyr")# 用于数据处理
+
+
+# #使用内置数据1
+# data(data_wt)
+# #内置数据2
+# data(env)
+
+
+```
+
+
+
+### 基于单个指标的统计分析
+
+正态检验和方差齐性分析，使用?NorNorCVTest查看帮助信息
+
+
+```{R}
+# 使用?NorNorCVTest查看帮助信息
+##使用案例
+NorCV = NorNorCVTest(data = data_wt, i= 4,method_cv = "leveneTest")
+
+#提取正态检验结果
+NorCV[[1]]
+
+# No         Name         W   p.value norm.test
+# 1            1           CF 0.9385422 0.6474760      Norm
+# 2            2           CK 0.9306138 0.5848500      Norm
+# 3            3          Rhi 0.9651627 0.8585061      Norm
+# 4            4           WT 0.9756280 0.9278774      Norm
+# 5 Test Method: Shapiro-Wilk        NA        NA      <NA>
+
+#提取方差齐性检验结果
+NorCV[[2]]
+# [1] 0.247
+
+```
+
+norm.test会按照分组告诉大家是否符合正态分布。
+
+### 方差分析(aovMcomper)
+
+- data:输入数据框，第一列为样本编号，第二列为分组，注意分组标签必须设定为group，第三列以后就是测定或者收集的指标了
+
+- i:代表您想要进行统计的列，比如：第三列：i = 3
+
+- method_Mc:选择需要使用的多重比较方法，这里又多种方法可供选择：method_Mc == "LSD";method_Mc == "SNK";method_Mc == "Duncan";method_Mc == "scheffe"
+
+```{R}
+
+# ?aovMcomper
+
+result= aovMcomper (data = data_wt, i= 6,method_Mc = "Tukey")
+
+
+# 提取多重比较结果
+result[[1]]
+
+# result[[1]] = ord_sig(data = result[[1]],ID = "groups")
+
+# groups group
+# CF      a     CF
+# CK      a     CK
+# Rhi      b   Rhi
+# WT      a     WT
+#提取方差检验结果
+result[[2]]
+
+# Call:
+#   aov(formula = count ~ group, data = ss)
+# 
+# Terms:
+#   group    Residuals
+# Sum of Squares  169573500000   3387000000
+# Deg. of Freedom            3           20
+# 
+# Residual standard error: 13013.45
+# Estimated effects may be unbalanced
+
+```
+
+结果中多重比较的展示全部使用字母表示了，虽然许多多种比较方法默认展示方式不同，但是我已经在包中将这些展示方式调整一致为字母。
+
+
+### 非参数检验
+
+两个参数代表的意义与方差分析的两个相同；
+
+- data:输入数据框，第一列为样本编号，第二列为分组，注意分组标签必须设定为group，第三列以后就是妮妮测定或者收集的指标了
+
+- i:代表您想要进行统计的列，比如：第三列：i = 3
+
+
+```{R}
+# ?KwWlx
+res = KwWlx(data = data_wt, i= 6)
+
+# 调用非参数两两比较结果：字母标记展示
+res[[1]]
+
+# groups group
+# CF      ab    CF
+# CK       a    CK
+# Rhi      c   Rhi
+# WT       b    WT
+
+#表格展示两两之间差异结果
+res[[2]]
+
+# .y.   group1 group2       p p.adj p.format p.signif method  
+# <chr> <chr>  <chr>    <dbl> <dbl> <chr>    <chr>    <chr>   
+#   1 count CF     CK     0.123   0.25  0.1228   ns       Wilcoxon
+# 2 count CF     Rhi    0.00470 0.028 0.0047   **       Wilcoxon
+# 3 count CF     WT     0.864   0.86  0.8643   ns       Wilcoxon
+# 4 count CK     Rhi    0.00470 0.028 0.0047   **       Wilcoxon
+# 5 count CK     WT     0.0488  0.15  0.0488   *        Wilcoxon
+# 6 count Rhi    WT     0.00470 0.028 0.0047   **       Wilcoxon
+
+```
+
+## 差异可视化方案（两种差异表示，三种图形展示）
+
+
+### 柱状图展示方差分析或非参数检验结果（aovMuiBarPlot）
+
+在这个包中将差异检测和出图部分分离，方便选择合适的图表和差异可视化的策略。最终要的参数是result ：为前面差异分析结果中的第一个表单，格式为第一列差异显著字母，第二列分组标签，列名，分组标签。如果只是用可视化的函数，直接从外面导入类似数据即可。
+
+```{R}
+
+data_wt$fun
+# ?aovMuiBarPlot
+###----使用方差检验结果和多重比较结果做展示：  柱状图展示
+PlotresultBar = aovMuiBarPlot(data = data_wt, i= 6,sig_show ="abc",result = result[[1]])
+#提取结果
+p1 <- PlotresultBar[[1]]
+
+
+PlotresultBar = aovMuiBarPlot(data = data_wt, i= 6,sig_show ="abc",result = res[[1]])
+#提取结果
+p2 <- PlotresultBar[[1]]
+
+
+library(patchwork)
+p1+p2
+
+
+```
+
+#### 标记字母顺序修改ord_sig
+
+
+```{R}
+
+datord <- ord_sig(data = result[[1]],ID = "groups")
+
+# ?aovMuiBarPlot
+###----使用方差检验结果和多重比较结果做展示：  柱状图展示
+PlotresultBar = aovMuiBarPlot(data = data_wt, i= 6,sig_show ="abc",result =datord)
+#提取结果
+p <- PlotresultBar[[1]]
+p
+
+```
+
+```{R}
+# ?aovMuiBarPlot
+###----使用方差检验结果和多重比较结果做展示：  柱状图展示
+PlotresultBar = aovMuiBarPlot(data = data_wt, i= 6,sig_show ="line",result = result[[1]])
+#提取结果
+p <- PlotresultBar[[1]]
+
+
+p
+
+
+# ggsave("2.png",p)
+#提取方差分析或非参数检验结果
+PlotresultBar[[2]]
+```
+
+
+```{R}
+# ?aovMuiBarPlot
+###----使用方差检验结果和多重比较结果做展示：  柱状图展示
+PlotresultBar = aovMuiBarPlot(data = data_wt, i= 5,sig_show ="line",result = result[[1]],ns =TRUE)
+#提取结果
+p <- PlotresultBar[[1]]
+ggsave("3.png",p)
+#提取方差分析或非参数检验结果
+PlotresultBar[[2]]
+```
+
+- data：输入数据框，第一列为样本编号，第二列为分组，注意分组标签必须设定为group，第三列以后就是测定或者收集的指标了
+
+- i：代表您想要进行统计的列，比如：第三列：i = 3
+
+- sig_show：代表差异展示方式；sig_show ="abc"是使用字母表示;sig_show ="line"是使用连线和星号表示；如果是NA，那么就不显示显著性结果
+
+- result：代表显著性差异分析结果，是一个数据框，第一列是显著性差异字母，第二列是分组group
+
+#### 箱线图展示方差分析或非参数检验结果（aovMuiBoxP）
+
+- data：输入数据框，第一列为样本编号，第二列为分组，注意分组标签必须设定为group，第三列以后就是测定或者收集的指标了
+
+- i：代表您想要进行统计的列，比如：第三列：i = 3
+
+- sig_show：代表差异展示方式；sig_show ="abc"是使用字母表示;sig_show ="line"是使用连线和星号表示；如果是NA，那么就不显示显著性结果
+
+- result：代表显著性差异分析结果，是一个数据框，第一列是显著性差异字母，第二列是分组group
+
+```{R}
+
+datord <- ord_sig(data = result[[1]],ID = "groups")
+
+# ?aovMuiBoxP
+# #使用案例
+PlotresultBox = aovMuiBoxP(data = data_wt, i= 6,sig_show ="abc",result = datord)
+# 提取检验结果
+PlotresultBox[[2]]
+#提取图片
+p = PlotresultBox[[1]]
+p
+
+# ggsave("4.png",p)
+
+```
+
+
+```{R}
+# ?aovMuiBoxP
+# #使用案例
+PlotresultBox = aovMuiBoxP(data = data_wt, i= 6,sig_show ="line",result = result[[1]])
+# 提取检验结果
+PlotresultBox[[2]]
+#提取图片
+p = PlotresultBox[[1]]
+
+p
+# ggsave("5.png",p)
+
+```
+
+
+```{R}
+# ?aovMuiBoxP
+# #使用案例
+PlotresultBox = aovMuiBoxP(data = data_wt, i= 6,sig_show ="line",result = result[[1]],ns = TRUE)
+# 提取检验结果
+PlotresultBox[[2]]
+#提取图片
+p = PlotresultBox[[1]]
+# ggsave("6.png",p)
+
+```
+
+
+### 点柱图-完美解决柱状图无法展示样本信息的缺陷
+
+```{R}
+result= aovMcomper (data = data_wt, i= 6,method_Mc = "Tukey")
+# # 提取多重比较结果
+result[[1]]
+PlotresultBox = aovMuiBoxBarP(data = data_wt, i= 6,sig_show ="abc",result = result[[1]],ns = TRUE)
+#提取图片
+p = PlotresultBox[[1]]
+
+p
+# ggsave("7.png",p)
+```
+
+```{R}
+
+PlotresultBox = aovMuiBoxBarP(data = data_wt, i= 6,sig_show ="line",result = result[[1]],ns = FALSE)
+#提取图片
+p = PlotresultBox[[1]]
+p
+
+# ggsave("8.png",p)
+```
+
+EasyStat包为什么能完美解决差异分析呢.因为他比你想象的要强大。下面使用连线形式展示差异，显著的差异按照标注星号，不显著的标注ns。
+
+```{R}
+PlotresultBox = aovMuiBoxBarP(data = data_wt, i= 6,sig_show ="line",result = result[[1]],ns = TRUE)
+#提取图片
+p = PlotresultBox[[1]]
+p
+ggsave("9.png",p)
+```
+
+## 多指标模式
+
+### 多个指标同时做正态检验和方差齐性分析（MuiNorCV）
+
+这里对多组数据进行分析，结果我是用T或F代表，方便阅读。
+
+- data：输入数据框，第一列为样本编号，第二列为分组，注意分组标签必须设定为group，第三列以后就是测定或者收集的指标了
+
+- num：代表您想要进行统计的列,这里可以输入多个列，只需要指定列号即可：例如：num = c(4:6)
+
+- method_cv：代表选择方差齐性的方法，有两种可供选择：method_cv == "bartlett.test" ;method_cv == "leveneTest"
+
+
+
+```{R}
+dim(data_wt)
+# ?MuiNorCV
+# 使用案例
+norCv = MuiNorCV(data = data_wt,num = c(4:10),method_cv = "leveneTest")
+#展示正态检验和方差齐性结果
+norCv
+
+```
+这里由于指标比较多，所以我将结果进行简化，直接使用ture和false来提示大家，cor是正态性检测组，cv是方差齐性检测。
+
+#### 多个指标方差检验（MuiaovMcomper）
+
+- data：输入数据框，第一列为样本编号，第二列为分组，注意分组标签必须设定为group，第三列以后就是测定或者收集的指标了
+
+- num：代表您想要进行统计的列,这里可以输入多个列，只需要指定列号即可：例如：num = c(4:6)
+
+- method_Mc：选择需要使用的多重比较方法，这里又多种方法可供选择：method_Mc = "LSD";method_Mc = "SNK";method_Mc = "Duncan";method_Mc ="scheffe"
+
+
+```{R}
+# ? MuiaovMcomper
+# #使用案例
+result = MuiaovMcomper(data = data_wt,num = c(4:6),method_Mc = "Tukey")
+#提取每个指标方差检验多重比较结果
+result
+
+# result = ord_sig(result, ID = NULL)
+
+```
+同样，多个指标展示按照指标每列为一组检测结果。
+
+### 多个指标非参数检验（MuiKwWlx）
+
+- data：输入数据框，第一列为样本编号，第二列为分组，注意分组标签必须设定为group，第三列以后就是测定或者收集的指标了
+
+- num：代表您想要进行统计的列,这里可以输入多个列，只需要指定列号即可：例如：num = c(4:6)
+
+```{R}
+# ? MuiKwWlx
+# #使用案例
+result = MuiKwWlx(data = data_wt,num = c(4:6))
+#提取每个指标非参数检验多重比较结果
+result
+
+# result = ord_sig(result, ID = NULL)
+
+```
+
+结果和多组方差分析结果一样。很好用于后面的出图，同样也适合自己导入数据，使用出图
+
+
+### 多组数据可视化差异分析结果： 柱状图（MuiPlotresultBar）
+
+多组指标分开出图，比较麻烦的是图形的保存，如果还需要让你一个一个保存图片，那也是相当繁琐的，所以这里我设置了自动保存，也只有这种方式是自动保存，其他单个，多组分面图形较少，所以就可以自己保存。
+
+我让该函数自动保存每个指标的出图文件到当前文件夹中。这些文件以该指标名称命名；
+
+
+- data：输入数据框，第一列为样本编号，第二列为分组，注意分组标签必须设定为group，第三列以后就是妮妮测定或者收集的指标了
+
+- num：代表您想要进行统计的列,这里可以输入多个列，只需要指定列号即可：例如：num = c(4:6)
+
+- sig_show：代表差异展示方式；sig_show ="abc"是使用字母表示;sig_show ="line"是使用连线和星号表示；如果是NA，那么就不显示显著性结果
+
+- result：代表显著性差异分析结果，是一个数据框，每一列是显著性标记字母,MuiKwWlx
+
+```{R}
+# ?MuiPlotresultBar
+# # #使用案例
+result = MuiKwWlx(data = data_wt,num = c(4:6))
+result
+# #结果直接输出到文件夹中
+MuiPlotresultBar(data = data_wt,num = c(4:6),result = result ,sig_show ="line")
+
+
+```
+
+### 多组数据可视化差异分析结果：箱线图（MuiPlotresultBox）
+
+我让该函数自动保存每个指标的出图文件到当前文件夹中。这些文件以该指标名称命名；
+
+
+- data：输入数据框，第一列为样本编号，第二列为分组，注意分组标签必须设定为group，第三列以后就是妮妮测定或者收集的指标了
+
+- num：代表您想要进行统计的列,这里可以输入多个列，只需要指定列号即可：例如：num = c(4:6)
+
+- sig_show：代表差异展示方式；sig_show ="abc"是使用字母表示;sig_show ="line"是使用连线和星号表示；如果是NA，那么就不显示显著性结果
+
+- result：代表显著性差异分析结果，是一个数据框，每一列是显著性标记字母,MuiKwWlx
+```{R}
+# ?MuiPlotresultBox
+#使用案例
+result = MuiKwWlx(data = data_wt,num = c(4:8))
+result
+# #直接出图到文件夹中
+MuiPlotresultBox(data = data_wt,num = c(4:8),result = result,sig_show ="abc")
+
+```
+
+### 线柱图
+
+输入和箱线图一致
+```{R}
+# ?MuiPlotresultBox
+#使用案例
+result = MuiKwWlx(data = data_wt,num = c(4:8))
+result
+# #直接出图到文件夹中
+MuiPlotReBoxBar(data = data_wt,num = c(4:8),result = result,sig_show ="line")
+
+```
+
+#### 差异结果展示：分面展示柱状图：(FacetMuiPlotresultBar)
+
+更新:
+- 由于不同指标坐标轴范围不同，分面添加显著性标示会让最高点的标示遮盖，已解决
+
+- data：输入数据框，第一列为样本编号，第二列为分组，注意分组标签必须设定为group，第三列以后就是妮妮测定或者收集的指标了
+
+- num：代表您想要进行统计的列,这里可以输入多个列，只需要指定列号即可：例如：num = c(4:6)
+
+- sig_show：代表差异展示方式；sig_show ="abc"是使用字母表示;sig_show ="line"是使用连线和星号表示；如果是NA，那么就不显示显著性结果
+
+- result：代表显著性差异分析结果，是一个数据框，每一列是显著性标记字母,MuiKwWlx
+- ncol:代表分面展示每一行放几张图
+
+```{R}
+
+library(ggplot2)
+# ?FacetMuiPlotresultBar
+# # #使用案例
+# data_wt$group = factor( data_wt$group,levels = c("WT","CK","Rhi","CF"))
+result = MuiaovMcomper(data = data_wt,num = c(4:7),method_Mc = "Tukey")
+result
+
+
+result1 = FacetMuiPlotresultBar(data = data_wt,num = c(4:7),result = result,sig_show ="abc",ncol = 4 )
+p <- result1[[1]]
+p
+
+# ggsave("10.png",p,width = 12,height = 6)
+
+```
+#### 设置分面排布顺序
+
+fac.level参数，指定即可。
+
+```{R}
+
+colnames( data_wt)[4:7]
+
+result1 = FacetMuiPlotresultBar(data = data_wt,num = c(4:7),result = result,sig_show ="abc",ncol = 4,
+                                fac.level = c("fun","bac","AP","micro") )
+p <- result1[[1]]
+p
+```
+
+### 差异结果展示：分面展示箱线图：(FacetMuiPlotresultBox)
+
+- data：输入数据框，第一列为样本编号，第二列为分组，注意分组标签必须设定为group，第三列以后就是妮妮测定或者收集的指标了
+
+- num：代表您想要进行统计的列,这里可以输入多个列，只需要指定列号即可：例如：num = c(4:6)
+
+- sig_show：代表差异展示方式；sig_show ="abc"是使用字母表示;sig_show ="line"是使用连线和星号表示；如果是NA，那么就不显示显著性结果
+
+- result：代表显著性差异分析结果，是一个数据框，每一列是显著性标记字母,MuiKwWlx
+
+- ncol:代表分面展示每一行放几张图
+
+
+```{R}
+# ?FacetMuiPlotresultBox
+# #使用案例
+result = MuiKwWlx(data = data_wt,num = c(4:7))
+result
+#
+result1 = FacetMuiPlotresultBox(data = data_wt,num = c(4:7),result = result,sig_show ="abc",ncol = 4 )
+p <- result1[[1]]
+ggsave("11.png",p,width = 15,height = 6)
+```
+
+
+#### 指定分面顺序
+
+
+```{R}
+
+colnames( data_wt)[4:7]
+
+result1 = FacetMuiPlotresultBox(data = data_wt,num = c(4:7),result = result,sig_show ="abc",ncol = 4,
+                                fac.level = c("fun","bac","AP","micro") )
+p <- result1[[1]]
+p
+```
+
+
+使用两种方法，我们可以对比非参数检验和方差检验结果是否一致
+
+### 下面使用线柱图展示
+
+
+```{R}
+# #使用案例
+result = MuiKwWlx(data = data_wt,num = c(4:7))
+result
+#
+result1 = FacetMuiPlotReBoxBar(data = data_wt,num = c(4:7),result = result,sig_show ="abc",ncol = 4 )
+p <- result1[[1]] 
+ggsave("12.png",p,width = 15,height = 6)
+
+```
+
+#### 指定分面顺序
+
+```{R}
+
+colnames( data_wt)[4:7]
+
+result1 =FacetMuiPlotReBoxBar(data = data_wt,num = c(4:7),result = result,sig_show ="abc",ncol = 4,
+                                fac.level = c("fun","bac","AP","micro") )
+p <- result1[[1]]
+p
+```
+
+注意以上三种分面展示的目前仅支持字母标注显著性，连线形式的尚未添加。
+
+### 多个分组可视化:GroupBar
+
+使用这种方式可视化一定要注意，坐标轴量度，不同指标范围不一样，因此，单位差距极大的指标一起展示就不太好看了。其次，这里使用line展示会非常混乱，所以我去除了line展示的方式，所以这里没有选择，只能是默认的abc。但是我保留了这个参数，希望以后又更好的方式。
+
+- ylimit = 1.2 :设置Y轴上界范围
+
+```{R}
+colnames(data_wt)
+result = MuiKwWlx(data = data_wt,num = c(8:10))
+result = GroupBar(data = data_wt,num = c(8:10),result = result,sig_show ="abc",ylimit = 1.2)
+# output result
+p <- result[[1]]
+ggsave("13.png",p)
+
+```
+
+这里我想告诉大家，所有的出图函数都可以提取数据，并且自己设计代码出图。
+
+这里我们提取数据,直接出图也是可以的
+
+```{R}
+
+A = result[[2]]
+
+p<-ggplot(A, aes(x=group , y=mean,group = name ))+
+    geom_bar(aes(colour= name,fill = name),stat = "identity", width = 0.9,position = "dodge") +
+
+    geom_errorbar(aes(ymin=mean - SD,
+                      ymax=mean + SD,group = name),
+                  colour="black",width=0.1,size = 1,position = position_dodge(.9))+
+
+    scale_y_continuous(expand = c(0,0))+#,limits = c(0,a)
+    labs(
+      y="count"
+      # y=name_i
+      # title = paste("Normality test",p1,"Homogeneity of variance",p2,sep = ":")
+    ) +
+    geom_text(data=A, aes(x=group, y=mean +SD ,label=groups),position = position_dodge(.9),vjust = -1)+
+    guides(color=guide_legend(title = NULL),shape=guide_legend(title = NULL))
+p
+
+ggsave("14.png",p,width = 12,height = 6)
+
+```
+
+
+
+### 单个指标一体化分析（SingleStat）
+
+这个函数可以将我们的目标列做正态检验和方差齐性，然后根据结果选择方差检验或者多重比较方法，最后选择自己需要的出图方式和显著性标记方式展示。
+
+- data：输入数据框，第一列为样本编号，第二列为分组，注意分组标签必须设定为group，第三列以后就是妮妮测定或者收集的指标了
+
+- i：代表您想要进行统计的列，比如：第三列：i = 3
+
+- method_Mc：选择需要使用的多重比较方法，这里又多种方法可供选择：method_Mc == "LSD";method_Mc == "SNK";method_Mc == "Duncan";method_Mc == "scheffe"
+
+- plot：可以选择需要的出图类型，柱状图和箱线图
+
+
+```{R}
+# ?SingleStat
+# # #使用案例
+# #输出结果第一个为图片，第二个是统计结果，第三个是统计方法
+result = SingleStat(data = data_wt,plot = "bar",method_Mc = "Tukey",i= 4,sig_show ="abc")
+# #导出图片
+p = result[[1]]
+p
+
+ggsave("15.png",p,width = 6,height = 6)
+
+```
+
+
+可以更换出图方式,当然这里会自动判断使用方差分析，还是非参数检验。选择结果会展示在结果的第三个列表中，可自行查看。
+
+
+```{R}
+# ?SingleStat
+# # #使用案例
+# #输出结果第一个为图片，第二个是统计结果，第三个是统计方法
+result = SingleStat(data = data_wt,plot = "box",method_Mc = "Tukey",i= 4,sig_show ="abc")
+# 提取差异检测结果
+result[[2]]
+# 提取差异检测放啊
+result[[3]]
+
+# #导出图片
+p = result[[1]]
+p
+ggsave("16.png",p,width = 6,height = 6)
+
+
+```
+
+
+
+```{R}
+# ?SingleStat
+# # #使用案例
+# #输出结果第一个为图片，第二个是统计结果，第三个是统计方法
+result = SingleStat(data = data_wt,plot = "boxbar",method_Mc = "Tukey",i= 4,sig_show ="abc")
+# 提取差异检测结果
+result[[2]]
+# 提取差异检测放啊
+result[[3]]
+
+# #导出图片
+p = result[[1]]
+p
+
+ggsave("17.png",p,width = 6,height = 6)
+
+
+```
+
+
+
+
+### 多个指标一体化分析(MuiStat)
+
+实现了多个指标批量整体运行；这个函数可以将我们的目标列做正态检验和方差齐性，然后根据结果选择方差检验或者多重比较方法，最后选择自己需要的出图方式和显著性标记方式展示。
+
+```{R}
+# ?MuiStat
+#使用案例
+result = MuiStat(data = data_wt,num = c(4:7),method_cv = "leveneTest",method_Mc = "Tukey",sig_show  = "abc",ncol = 4,plot = "box",plottype = "mui")
+p <- result[[1]]
+p
+# 提取方差检测的列
+result$aov
+# 提取f非参数检测的列
+result$wlx
+# 提取差异检测结果
+result$table
+
+ggsave("18.png",p,width = 16,height = 6)
+
+```
+
+柱状图
+
+```{R}
+
+result = MuiStat(data = data_wt,num = c(4:7),method_cv = "leveneTest",method_Mc = "Tukey",sig_show  = "abc",ncol = 4,plot = "bar",plottype = "mui")
+p <- result[[1]]
+
+ggsave("19.png",p,width = 16,height = 6)
+
+
+```
+
+```{R}
+
+result = MuiStat(data = data_wt,num = c(4:7),method_cv = "leveneTest",method_Mc = "Tukey",sig_show  = "abc",ncol = 4,plot = "boxbar",plottype = "mui")
+p <- result[[1]]
+ggsave("20.png",p,width = 16,height = 6)
+
+```
+
+
+
+data：输入数据框，第一列为样本编号，第二列为分组，注意分组标签必须设定为group，第三列以后就是妮妮测定或者收集的指标了
+
+num：代表您想要进行统计的列,这里可以输入多个列，只需要指定列号即可：例如：num = c(4:6)
+
+method_cv：代表选择方差齐性的方法，有两种可供选择：method_cv == "bartlett.test" ;method_cv == "leveneTest"
+
+method_Mc：选择需要使用的多重比较方法，这里又多种方法可供选择：method_Mc == "LSD";method_Mc == "SNK";method_Mc == "Duncan";method_Mc == "scheffe"
+
+plot：可以选择需要的出图类型，柱状图和箱线图
+
+sig_show：代表差异展示方式；sig_show ="abc"是使用字母表示;sig_show ="line"是使用连线和星号表示；如果是NA，那么就不显示显著性结果
+
+ncol：代表分面展示每一行放几张图
+
+plottype：输出图形是分面展示plottype =mui，还是单张展示:plottype == "single"
+
+
+```{R}
+result = MuiKwWlx(data = data_wt,num = c(4,9,8))
+res <- MuiPlotStackBar(data = data,i = c(4,9,8) ,result = result)
+
+
+res[[1]]
+```
+
+
+```{R}
+
+# 由于数据已经标准化了，这里我们改编一下
+
+env$env4 <- env$env4^2
+env$env5 <- env$env5^2
+result = MuiKwWlx(data = env,num = c(3,4))
+res <- MuiPlotStackBar(data = env,i = c(3,4) ,result = result,errbar = FALSE)
+```
+
+
+
+
+
+
