@@ -121,60 +121,71 @@ aovMcomper2 = function( data = data_wt, i= 3,method_Mc = "Tukey"){
 #' Microbiome 2018,DOI: \url{doi: 10.1186/s40168-018-0537-x}
 #' @export
 
-KwWlx2 = function(data = data_wt, i= 3,method = "wilcox.test"){
 
+KwWlx2 = function(data = data_wt, i = 3, method = "wilcox.test",
+                  p.adjust.method = "none") {
+  
   ss <- data %>%
-    dplyr::select("group",count = i)
-
-  # kruskal.test
-  krusk = ggpubr::compare_means(count ~ group, data=ss, method = "kruskal.test")
-  # krusk = kruskal.test(count ~ group, data=ss)
-
-  sumkrusk=as.data.frame(krusk)
-  sumkrusk
-  #<0.05,It shows that there are differences between multiple groups, you can conduct pairwise non-parametric tests, and mark the letters
-  krusk <- ggpubr::compare_means(count ~ group, data=ss, method = method)
-  xx=as.data.frame(krusk)
-
-  #mean for order
+    dplyr::select("group", count = i)
+  
+  # Overall Kruskal-Wallis test
+  krusk <- ggpubr::compare_means(count ~ group, data = ss, method = "kruskal.test")
+  sumkrusk <- as.data.frame(krusk)
+  
+  # Pairwise tests
+  krusk <- ggpubr::compare_means(count ~ group, data = ss, method = method)
+  xx <- as.data.frame(krusk)
+  
+  # Compute group means for letter sorting
   da <- ss %>%
     dplyr::group_by(group) %>%
-    dplyr::summarise( mean = mean(count))  %>%
+    dplyr::summarise(mean = mean(count)) %>%
     dplyr::arrange(desc(mean)) %>%
     as.data.frame()
-
-  if (as.character(da$group)[1]  %in% xx$group1) {
-    xx = xx[order(factor(xx$group1,as.character(da$group))),]
-    wilcox_levels = xx$p
-    names(wilcox_levels) =  paste(xx$group1,xx$group2,sep = "-")
+  
+  # Build named p-value vector
+  if (as.character(da$group)[1] %in% xx$group1) {
+    xx <- xx[order(factor(xx$group1, as.character(da$group))), ]
+    wilcox_levels <- xx$p
+    names(wilcox_levels) <- paste(xx$group1, xx$group2, sep = "-")
   } else {
-    xx = xx[order(factor(xx$group2,as.character(da$group))),]
-    wilcox_levels = xx$p
-    names(wilcox_levels) =  paste(xx$group2,xx$group1,sep = "-")
+    xx <- xx[order(factor(xx$group2, as.character(da$group))), ]
+    wilcox_levels <- xx$p
+    names(wilcox_levels) <- paste(xx$group2, xx$group1, sep = "-")
   }
-
-
-  wilcox.labels <- data.frame(multcompView::multcompLetters(wilcox_levels, threshold = 0.05)['Letters'])
-  colnames(wilcox.labels) = "groups"
-  aa = wilcox.labels
-  aa$group = row.names(aa)
-  # aa =ord_sig(data = aa,ID = "groups")
-  dat <- ss %>% group_by(group) %>%
+  
+  # ── 核心改动：在生成CLD字母之前，对p值进行多重检验校正 ──
+  # 当 p.adjust.method = "none" 时，p.adjust() 原样返回，行为与旧版完全一致
+  wilcox_levels <- p.adjust(wilcox_levels, method = p.adjust.method)
+  
+  # Generate CLD letters
+  wilcox.labels <- data.frame(
+    multcompView::multcompLetters(wilcox_levels, threshold = 0.05)["Letters"]
+  )
+  colnames(wilcox.labels) <- "groups"
+  aa <- wilcox.labels
+  aa$group <- row.names(aa)
+  
+  # Sort letters by group mean
+  dat <- ss %>%
+    dplyr::group_by(group) %>%
     dplyr::summarise(mean = mean(count)) %>%
-    dplyr::inner_join(as_tibble(aa),by = c("group" = "group")) %>%
+    dplyr::inner_join(as_tibble(aa), by = c("group" = "group")) %>%
     dplyr::arrange(desc(mean))
+  
   tmp.1 <- dat$groups %>% unique()
-  tmp.2 <- data.frame(ori = tmp.1,new = sort(tmp.1,decreasing = FALSE))
-  i = 1
-  for (i in 1:nrow(dat)) {
-    dat[i,3] <- tmp.2$new[match(dat[i,3],tmp.2$ori)]
+  tmp.2 <- data.frame(ori = tmp.1, new = sort(tmp.1, decreasing = FALSE))
+  
+  for (k in 1:nrow(dat)) {
+    dat[k, 3] <- tmp.2$new[match(dat[k, 3], tmp.2$ori)]
   }
-  dat$mean = NULL
-  dat = dat[match(dat$group,aa$group),][,c(2,1)] %>% as.data.frame()
-  row.names(dat) = dat$group
-  return(list(dat,wilcox = krusk,kruskal = sumkrusk))
+  
+  dat$mean <- NULL
+  dat <- dat[match(dat$group, aa$group), ][, c(2, 1)] %>% as.data.frame()
+  row.names(dat) <- dat$group
+  
+  return(list(dat, wilcox = krusk, kruskal = sumkrusk))
 }
-
 
 #' Perform ANOVA and run multiple comparisons for more sets of data and order in order to mean value of treatment
 #'
@@ -239,46 +250,29 @@ MuiaovMcomper2 = function(data = data_wt,num = c(4:6),method_Mc = "Tukey"){
 #' Microbiome 2018,DOI: \url{doi: 10.1186/s40168-018-0537-x}
 #' @export
 
-MuiKwWlx2 = function(data = data_wt,num = c(4:6)){
-  N = num[1]
-
-  data_wt = data
-  result = KwWlx2(data = data_wt, i= N)
-  aa = result[[1]]
-  name = colnames(data_wt[N])
-
-  colnames(aa)[1] = name
-  aa$group = NULL
-  A = aa
-
+MuiKwWlx2 = function(data = data_wt, num = c(4:6), p.adjust.method = "none") {
+  
+  N <- num[1]
+  data_wt <- data
+  
+  result <- KwWlx2(data = data_wt, i = N, p.adjust.method = p.adjust.method)
+  aa <- result[[1]]
+  name <- colnames(data_wt[N])
+  colnames(aa)[1] <- name
+  aa$group <- NULL
+  A <- aa
+  
   for (N in num[-1]) {
-    result = KwWlx2(data = data_wt, i= N)
-    aa = result[[1]]
-    name = colnames(data_wt[N])
-
-    colnames(aa)[1] = name
-    aa$group = NULL
-
-    A <- merge(A,aa,by = "row.names",all = T)
-    row.names(A) = A$Row.names
-    A$Row.names = NULL
-
-
-
+    result <- KwWlx2(data = data_wt, i = N, p.adjust.method = p.adjust.method)
+    aa <- result[[1]]
+    name <- colnames(data_wt[N])
+    colnames(aa)[1] <- name
+    aa$group <- NULL
+    
+    A <- merge(A, aa, by = "row.names", all = TRUE)
+    row.names(A) <- A$Row.names
+    A$Row.names <- NULL
   }
-
+  
   return(A)
-
 }
-
-
-
-
-
-
-
-
-
-
-
-

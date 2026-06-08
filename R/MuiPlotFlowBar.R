@@ -77,8 +77,11 @@ MuiPlotFlowBar <- function(data = data,
     # Construct error line coordinates--
     # df_res = plyr::ddply(df_res,"group",transform,label_y = cumsum(Mean))
     # Construct distinctive marker positions
-    df_res_sub = plyr::ddply(df_res,"group", summarize,label_y = cumsum(Mean),  label_abc = cumsum(Mean) - 0.5*Mean,
-                             variable = variable)
+    df_res_sub = df_res %>%
+      dplyr::group_by(group) %>%
+      dplyr::mutate(label_y = cumsum(Mean), label_abc = cumsum(Mean) - 0.5*Mean) %>%
+      dplyr::ungroup() %>%
+      dplyr::select(group, variable, label_y, label_abc)
     # df_res = cbind(df_res,df_res_sub[-1])
     df_res <- df_res%>%
       dplyr::inner_join(df_res_sub )

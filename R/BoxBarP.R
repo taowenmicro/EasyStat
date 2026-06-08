@@ -38,7 +38,7 @@ aovMuiBoxBarP = function(data = data_wt, i= 3,sig_show ="line",result = result,n
   min=min(data_box[,c("dd")],na.rm = TRUE)
   x = data_box[,c("group","dd")]
 
-  y = x %>% group_by(group) %>% summarise_(Max=paste('max(',"dd",",na.rm = TRUE",')',sep=""))
+  y = x %>% group_by(group) %>% summarise(Max = max(dd, na.rm = TRUE))
 
 
 
@@ -64,6 +64,7 @@ p = ggplot() +
 # geom_vline(aes(xintercept=0), colour="black", linetype="dashed")
 head(data_box)
 if (sig_show == "abc") {
+  tab.abc = data_box %>% distinct( group, .keep_all = TRUE)
   p = p +
     geom_text(data=data_box, aes(x=group, y=y*1.1, label= stat))
 
