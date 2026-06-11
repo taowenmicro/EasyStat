@@ -2,7 +2,9 @@
 % Please edit documentation in R/SingleStat.R
 \name{SingleStat}
 \alias{SingleStat}
-\title{A complete single-factor difference analysis process for single col data, including normal test, homogeneity analysis of variance, selection of variance analysis or non-parametric test, selection of candidate d visualization method.}
+\title{A complete single-factor difference analysis process for single col data, including normal test,
+homogeneity analysis of variance, selection of variance analysis or non-parametric test,
+selection of candidate visualization method.}
 \usage{
 SingleStat(
   data = data_wt,
@@ -13,33 +15,38 @@ SingleStat(
 )
 }
 \arguments{
-\item{data}{a data.frame contain the input data.Enter the data frame, the first column is the sample number,
-the second column is the group, note that the group label must be set to group, and the third column and later are the
-indicators for measurement or collection.}
+\item{data}{a data.frame; first column is sample ID, second column is group (must be named "group"),
+subsequent columns are response variables.}
 
-\item{method_Mc}{which specify the method of multiple comparisons.included:"Tukey","LSD","SNK","Duncan","scheffe","scheffe".}
+\item{plot}{plot type: "bar", "box", or "boxbar"}
 
-\item{sig_show}{Distinctive display, "abc" or "line"}
+\item{method_Mc}{method for ANOVA post-hoc comparison: "Tukey", "LSD", "SNK", "Duncan", "scheffe"}
 
-\item{num}{col index wtich need to test}
+\item{i}{col index or column name of the variable to test}
 
-\item{method_cv}{which method to test  variance, included "leveneTest","bartlett.test"}
+\item{sig_show}{significance display format: "abc" or "line"}
 }
 \value{
-list
+list: [[1]] plot; $table CLD result; $method character string of method used
 }
 \description{
-A complete single-factor difference analysis process for single col data, including normal test, homogeneity analysis of variance, selection of variance analysis or non-parametric test, selection of candidate d visualization method.
+The function implements a three-path decision rule:
+(1) Normal distribution AND homogeneity of variance -> one-way ANOVA (aovMcomper2)
+(2) Normal distribution BUT heterogeneous variance  -> Welch's ANOVA (WelchAov)
+(3) Non-normal distribution (regardless of variance) -> Kruskal-Wallis + Wilcoxon (KwWlx2)
 }
 \examples{
 # data(data_wt)
-result = SingleStat(data = data_wt,plot = "bar",method_Mc = "Tukey",i= 4,sig_show ="abc")
+result = SingleStat(data = data_wt, plot = "boxbar", method_Mc = "Tukey", i = 4, sig_show = "abc")
 result[[1]]
+result[[2]]   # CLD table
+result[[3]]   # method used: "aov", "welch", or "wlx"
 }
 \references{
-Yuan J, Zhao J, Wen T, Zhao M, Li R, Goossens P, Huang Q, Bai Y, Vivanco JM, Kowalchuk GA, Berendsen RL, Shen Q
+Yuan J, Zhao J, Wen T, Zhao M, Li R, Goossens P, Huang Q, Bai Y, Vivanco JM,
+Kowalchuk GA, Berendsen RL, Shen Q
 Root exudates drive the soil-borne legacy of aboveground pathogen infection
-Microbiome 2018,DOI: \url{doi: 10.1186/s40168-018-0537-x}
+Microbiome 2018, DOI: \url{doi: 10.1186/s40168-018-0537-x}
 }
 \author{
 Contact: Tao Wen \email{2018203048@njau.edu.cn} Jun Yuan \email{junyuan@njau.edu.cn}

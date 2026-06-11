@@ -2,7 +2,9 @@
 % Please edit documentation in R/MuiStat.R
 \name{MuiStat}
 \alias{MuiStat}
-\title{A complete single-factor difference analysis process for mui col data, including normal test, homogeneity analysis of variance, selection of variance analysis or non-parametric test, selection of candidate d visualization method.}
+\title{A complete single-factor difference analysis process for mui col data, including normal test,
+homogeneity analysis of variance, selection of variance analysis or non-parametric test,
+selection of candidate visualization method.}
 \usage{
 MuiStat(
   data = data_wt,
@@ -17,39 +19,54 @@ MuiStat(
 )
 }
 \arguments{
-\item{data}{a data.frame contain the input data;Enter the data frame, the first column is the sample number, the second column is the group, note that the group label must be set to group, and the third column and later are the indicators for measurement or collection.}
+\item{data}{a data.frame; first column is sample ID, second column is group (must be named "group"),
+subsequent columns are response variables.}
 
-\item{num}{col index wtich need to test}
+\item{num}{col index vector which need to test}
 
-\item{method_cv}{which method to test  variance, included "leveneTest","bartlett.test"}
+\item{method_cv}{method for variance homogeneity test: "leveneTest" or "bartlett.test"}
 
-\item{method_Mc}{which specify the method of multiple comparisons.included:"Tukey","LSD","SNK","Duncan","scheffe","scheffe".}
+\item{method_Mc}{method for ANOVA post-hoc comparison: "Tukey", "LSD", "SNK", "Duncan", "scheffe"}
 
-\item{sig_show}{Distinctive display, "abc" or "line"}
+\item{sig_show}{significance display format: "abc" or "line"}
 
-\item{ncol}{If you choose faceted display, choose to place several graphics per line}
+\item{ncol}{number of columns in faceted display}
 
-\item{plot}{chose the plot type shuld be a barplot or boxplot or bar+box plot}
+\item{plot}{plot type: "bar", "box", or "boxbar"}
 
-\item{plottype}{select a plot type, included "single" and "mui"}
+\item{plottype}{output type: "single" (separate files) or "mui" (faceted)}
 
-\item{path}{creat a folder to save the single plot, if you seleted the model "single"}
+\item{path}{folder path for saving plots when plottype = "single"}
 }
 \value{
-list
+list: [[1]] plot object; $aov column indices sent to ANOVA;
+              $welch column indices sent to Welch's ANOVA;
+              $wlx column indices sent to Kruskal-Wallis; $table CLD result data.frame
 }
 \description{
-A complete single-factor difference analysis process for mui col data, including normal test, homogeneity analysis of variance, selection of variance analysis or non-parametric test, selection of candidate d visualization method.
+The function implements a three-path decision rule:
+(1) Normal distribution AND homogeneity of variance -> one-way ANOVA (MuiaovMcomper2)
+(2) Normal distribution BUT heterogeneous variance  -> Welch's ANOVA (MuiWelchAov)
+(3) Non-normal distribution (regardless of variance) -> Kruskal-Wallis + Wilcoxon (MuiKwWlx2)
 }
 \examples{
 # data(data_wt)
-result = MuiStat(data = data_wt,num = c(4,5,6),method_cv = "leveneTest",method_Mc = "Tukey",sig_show  = "abc",ncol = 2,plot = "boxbar",plottype = "mui")
+result = MuiStat(data = data_wt, num = c(4,5,6), method_cv = "leveneTest",
+                 method_Mc = "Tukey", sig_show = "abc", ncol = 2,
+                 plot = "boxbar", plottype = "mui")
 result[[1]]
+# Variables routed to ANOVA
+result$aov
+# Variables routed to Welch's ANOVA
+result$welch
+# Variables routed to Kruskal-Wallis / Wilcoxon
+result$wlx
 }
 \references{
-Yuan J, Zhao J, Wen T, Zhao M, Li R, Goossens P, Huang Q, Bai Y, Vivanco JM, Kowalchuk GA, Berendsen RL, Shen Q
+Yuan J, Zhao J, Wen T, Zhao M, Li R, Goossens P, Huang Q, Bai Y, Vivanco JM,
+Kowalchuk GA, Berendsen RL, Shen Q
 Root exudates drive the soil-borne legacy of aboveground pathogen infection
-Microbiome 2018,DOI: \url{doi: 10.1186/s40168-018-0537-x}
+Microbiome 2018, DOI: \url{doi: 10.1186/s40168-018-0537-x}
 }
 \author{
 Contact: Tao Wen \email{2018203048@njau.edu.cn} Jun Yuan \email{junyuan@njau.edu.cn}

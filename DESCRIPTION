@@ -9,7 +9,7 @@ Description: More about what it does (maybe more than one line)
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.1
+RoxygenNote: 7.3.3
 Imports:
 	dplyr,
 	tidyr,
@@ -19,6 +19,7 @@ Imports:
 	multcompView,
 	reshape2,
 	plyr,
+             rstatix,
 	aplot
 URL: https://github.com/taowenmicro/EasyStat
 BugReports: https://github.com/taowenmicro/EasyStat/issues

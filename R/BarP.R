@@ -85,8 +85,7 @@ aovMuiBarPlot = function(data = data_wt, i= 3,sig_show ="line",result = result,n
 
 
   if (sig_show == "abc") {
-
-
+    tab.abc = data_box %>% distinct( group, .keep_all = TRUE)
     p = p + geom_text(aes(label = groups,y=ymax, x = group,vjust = -0.3,size = 6))
     p
   }
