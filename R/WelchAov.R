@@ -20,12 +20,15 @@
 WelchAov = function(data = data_wt, i = 3) {
 
   ss <- data %>%
-    dplyr::select("group", count = i)
+    dplyr::select("group", count = dplyr::all_of(i))
 
   ss$group <- as.factor(ss$group)
 
   # Welch's one-way ANOVA (does not assume equal variances)
   welch_model <- oneway.test(count ~ group, data = ss, var.equal = FALSE)
+
+  # omnibus p-value of Welch's F test
+  p_omnibus_raw <- unname(welch_model$p.value)
 
   # Games-Howell post-hoc test (does not assume equal variances or equal sample sizes)
   gh_result <- rstatix::games_howell_test(ss, count ~ group)
@@ -72,5 +75,6 @@ WelchAov = function(data = data_wt, i = 3) {
     as.data.frame()
   row.names(dat) <- dat$group
 
-  return(list(dat, welch = welch_model, posthoc = gh_result))
+  return(list(dat, welch = welch_model, posthoc = gh_result,
+              p_omnibus_raw = p_omnibus_raw))
 }

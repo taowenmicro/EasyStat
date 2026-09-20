@@ -84,7 +84,8 @@ if (sig_show == "line") {
   xxxx
   sig_lis = rep("a",dim(zuhe)[2])
   for (i in 1:dim(zuhe)[2]) {
-    library(tidyverse)
+    # library(tidyverse) removed: a package must not attach packages at run
+    # time; dplyr::filter is imported in EasyStat-package.R instead.
 
     if (filter(aa, group == xxxx[[i]][1])$groups == filter(aa, group == xxxx[[i]][2])$groups) {
       sig_lis[i] = "no_sig"

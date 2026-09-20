@@ -4,7 +4,7 @@
 \alias{KwWlx2}
 \title{Easy for Non-parametric test and order in order to mean value of treatment}
 \usage{
-KwWlx2(data = data_wt, i = 3, method = "wilcox.test")
+KwWlx2(data = data_wt, i = 3, method = "wilcox.test", p.adjust.method = "none")
 }
 \arguments{
 \item{data}{a data.frame contain the input data}

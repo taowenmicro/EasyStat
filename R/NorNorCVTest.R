@@ -16,10 +16,12 @@
 #' @export
 
 
-NorNorCVTest = function(data = data_wt, i= 4,method_cv = "leveneTest",...){
+NorNorCVTest = function(data = data_wt, i= 4,method_cv = "leveneTest",
+                        normality_adjust = c("none","bonferroni"),...){
+  normality_adjust <- match.arg(normality_adjust)
   ##----Test normality and homogeneity of variance of Input data-------
   ss <- data %>%
-    dplyr::select("group",count = i)
+    dplyr::select("group", count = dplyr::all_of(i))
   shapiro.test.multi <- function(
     data,
     value,
@@ -36,19 +38,33 @@ NorNorCVTest = function(data = data_wt, i= 4,method_cv = "leveneTest",...){
                               W=0,         #W value
                               p.value=0,   #p value
                               norm.test=0) #result
+    # multiplicity of the per-group tests: applying alpha = 0.05 to each of k
+    # groups misclassifies a proportion 1-(1-alpha)^k of genuinely normal
+    # variables (18.5% with k = 4). "bonferroni" uses alpha = 0.05/k instead.
+    alpha <- if (identical(normality_adjust, "bonferroni")) 0.05/length(a2) else 0.05
+
     for (i in (1:length(a2))){
       # subgroup for shapiro.text
       subset(data,
              group == a2[i],
              select = value) %>%
-        .[,1] %>%
-        shapiro.test(.) -> t.r
+        .[,1] -> x.i
+
+      # shapiro.test() aborts on a constant group; such a group cannot satisfy
+      # the normality assumption, so treat it as non-normal and route the
+      # variable to the non-parametric branch rather than failing the batch.
+      x.i <- x.i[!is.na(x.i)]
+      if (length(x.i) < 3 || stats::var(x.i) == 0) {
+        t.r <- list(statistic = NA_real_, p.value = 0)
+      } else {
+        t.r <- shapiro.test(x.i)
+      }
       test.result[i,1] = i              #group number
       test.result[i,2] = a2[i]          #group name
       test.result[i,3] = t.r$statistic  #w value
       test.result[i,4] = t.r$p.value    #p value
       if
-      (t.r$p.value > 0.05)
+      (t.r$p.value > alpha)
         test.result[i,5] = "Norm"
       else
         test.result[i,5] = "Other_situation"
@@ -61,15 +77,18 @@ NorNorCVTest = function(data = data_wt, i= 4,method_cv = "leveneTest",...){
   a
   # selected the method for tast the Homogeneity of variance
   # p2 >=.05:Homogeneity of variance
+  # p2 is NOT rounded: rounding to 3 decimals let a single rounding step decide
+  # the pathway of variables whose homogeneity p-value sits on the boundary.
   if (method_cv == "leveneTest" ) {
     xc <- car::leveneTest(count~group,data=ss)
     p2 <- xc[[3]][1]
-    p2 <- round(p2,3)
   }
   if (method_cv == "bartlett.test" ) {
     xc <- bartlett.test(count~group,data=ss)
     p2 <- xc[[3]]
-    p2 <- round(p2,3)
   }
+  # a constant variable yields NaN here; treat it as non-homogeneous so the
+  # variable is not silently routed to ANOVA
+  if (length(p2) == 0 || is.na(p2)) p2 <- 0
   return(list(a,p2))
 }

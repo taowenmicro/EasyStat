@@ -4,7 +4,12 @@
 \alias{MuiNorCV}
 \title{Test normality and homogeneity of variance of inputmore sets of data}
 \usage{
-MuiNorCV(data = data_wt, num = c(4:6), method_cv = "leveneTest")
+MuiNorCV(
+  data = data_wt,
+  num = c(4:6),
+  method_cv = "leveneTest",
+  normality_adjust = c("none", "bonferroni")
+)
 }
 \arguments{
 \item{data}{a data.frame contain the input data}

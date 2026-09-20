@@ -29,7 +29,7 @@
 
 aovMcomper = function( data = data_wt, i= 3,method_Mc = "Tukey"){
   ss <- data %>%
-    dplyr::select("group",count = i)
+    dplyr::select("group", count = dplyr::all_of(i))
 
   # variance analysis
   model<-aov(count ~ group, data= ss)

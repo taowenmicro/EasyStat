@@ -32,7 +32,7 @@ TtestSingle = function(data = data_wt, i = 3,
                        p.adjust.method = "none") {
 
   ss <- data %>%
-    dplyr::select("group", count = i)
+    dplyr::select("group", count = dplyr::all_of(i))
 
   ss$group <- as.factor(ss$group)
   groups <- levels(ss$group)

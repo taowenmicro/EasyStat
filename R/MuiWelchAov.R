@@ -19,17 +19,26 @@ MuiWelchAov = function(data = data_wt, num = c(4:6)) {
 
   data$group <- as.factor(data$group)
 
+  # collect the omnibus p-value of every variable, in the order given by num
+  omnibus_p_values <- numeric(length(num))
+  names(omnibus_p_values) <- colnames(data)[num]
+
   N <- num[1]
   result <- WelchAov(data = data, i = N)
   aa <- result[[1]]
+  omnibus_p_values[1] <- result$p_omnibus_raw
   name <- colnames(data[N])
   colnames(aa)[1] <- name
   aa$group <- NULL
   A <- aa
 
-  for (N in num[-1]) {
+  # seq_along(num)[-1] is empty when num holds a single variable;
+  # 2:length(num) would expand to c(2, 1) there and index num[2] = NA
+  for (idx in seq_along(num)[-1]) {
+    N <- num[idx]
     result <- WelchAov(data = data, i = N)
     aa <- result[[1]]
+    omnibus_p_values[idx] <- result$p_omnibus_raw
     name <- colnames(data[N])
 
     colnames(aa)[1] <- name
@@ -41,5 +50,6 @@ MuiWelchAov = function(data = data_wt, num = c(4:6)) {
     A$Row.names <- NULL
   }
 
+  attr(A, "omnibus_p_raw") <- omnibus_p_values
   return(A)
 }

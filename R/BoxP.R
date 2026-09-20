@@ -27,7 +27,7 @@ aovMuiBoxP = function(data = data_wt, i= 3,sig_show ="line",result = result,ns =
   aa = result
   name_i = colnames(data[i])
   data_box =   data %>%
-    dplyr::select(1,2,i)
+    dplyr::select(1, 2, dplyr::all_of(i))
   colnames(data_box) = c("ID" , "group","dd" )
 
 

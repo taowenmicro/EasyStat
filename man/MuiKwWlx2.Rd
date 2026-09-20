@@ -4,7 +4,7 @@
 \alias{MuiKwWlx2}
 \title{Multi-group data for non-parametric test}
 \usage{
-MuiKwWlx2(data = data_wt, num = c(4:6))
+MuiKwWlx2(data = data_wt, num = c(4:6), p.adjust.method = "none")
 }
 \arguments{
 \item{data}{a data.frame contain the input data and order in order to mean value of treatment}

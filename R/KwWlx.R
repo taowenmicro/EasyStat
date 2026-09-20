@@ -21,7 +21,7 @@
 KwWlx = function(data = data_wt, i= 3,method = "wilcox.test"){
 
   ss <- data %>%
-    dplyr::select("group",count = i)
+    dplyr::select("group", count = dplyr::all_of(i))
 
   # kruskal.test
   krusk = ggpubr::compare_means(count ~ group, data=ss, method = "kruskal.test")

@@ -15,58 +15,88 @@ MuiStat(
   ncol = 2,
   plot = "bar",
   plottype = "mui",
-  path = "./output"
+  path = "./output",
+  p.adjust.method = "none",
+  apply_omnibus_fdr = TRUE,
+  fdr_threshold = 0.05,
+  omnibus_fdr_method = "BH",
+  homogeneity_pretest = TRUE,
+  normality_adjust = c("none", "bonferroni")
 )
 }
 \arguments{
-\item{data}{a data.frame; first column is sample ID, second column is group (must be named "group"),
-subsequent columns are response variables.}
+\item{data}{a data.frame; first column is sample ID, second column is group
+(must be named "group"), subsequent columns are response variables.}
 
 \item{num}{col index vector which need to test}
 
 \item{method_cv}{method for variance homogeneity test: "leveneTest" or "bartlett.test"}
 
-\item{method_Mc}{method for ANOVA post-hoc comparison: "Tukey", "LSD", "SNK", "Duncan", "scheffe"}
+\item{method_Mc}{method for ANOVA post-hoc: "Tukey","LSD","SNK","Duncan","scheffe"}
 
-\item{sig_show}{significance display format: "abc" or "line"}
+\item{sig_show}{significance display: "abc" or "line"}
 
-\item{ncol}{number of columns in faceted display}
+\item{ncol}{columns in faceted display}
 
 \item{plot}{plot type: "bar", "box", or "boxbar"}
 
-\item{plottype}{output type: "single" (separate files) or "mui" (faceted)}
+\item{plottype}{output type: "single" or "mui"}
 
 \item{path}{folder path for saving plots when plottype = "single"}
+
+\item{p.adjust.method}{p-value adjustment for non-parametric path. Default "none".}
+
+\item{apply_omnibus_fdr}{logical; when TRUE (default) the omnibus p-values of
+all variables analysed in one call are corrected jointly, and post-hoc
+comparisons are computed only for variables that pass \code{fdr_threshold}.}
+
+\item{fdr_threshold}{numeric; threshold applied to the adjusted omnibus
+p-value for post-hoc gating. Default 0.05.}
+
+\item{omnibus_fdr_method}{method passed to \code{p.adjust} for the
+across-variable correction. Default "BH".}
+
+\item{homogeneity_pretest}{logical; when TRUE (default, the original
+behaviour) Levene's test decides between ANOVA and Welch's ANOVA for
+normally distributed variables. Set FALSE to route all normal variables
+directly to Welch's ANOVA. Levene's test has little power at small n, so
+heteroscedastic variables may be routed to ANOVA precisely when that choice
+is least safe; FALSE is the safer setting for new analyses with small
+groups, and TRUE is kept as the default so that published analyses remain
+reproducible.}
+
+\item{normality_adjust}{multiplicity adjustment for the per-group
+Shapiro-Wilk tests: "none" (default, the original behaviour) or
+"bonferroni" (alpha = 0.05/k). "bonferroni" removes the misclassification
+of genuinely normal variables but also lets skewed variables pass the
+normality screen, so it is not recommended for skewed data.}
 }
 \value{
-list: [[1]] plot object; $aov column indices sent to ANOVA;
-              $welch column indices sent to Welch's ANOVA;
-              $wlx column indices sent to Kruskal-Wallis; $table CLD result data.frame
+list: [[1]] plot; $aov $welch $wlx column indices; $table CLD
+  data.frame (letters are NA for variables suppressed by gating); $omnibus a
+  data.frame with the raw and across-variable adjusted omnibus p-value and
+  the gating outcome for each variable
 }
 \description{
-The function implements a three-path decision rule:
-(1) Normal distribution AND homogeneity of variance -> one-way ANOVA (MuiaovMcomper2)
-(2) Normal distribution BUT heterogeneous variance  -> Welch's ANOVA (MuiWelchAov)
-(3) Non-normal distribution (regardless of variance) -> Kruskal-Wallis + Wilcoxon (MuiKwWlx2)
+First checks number of groups, then applies the appropriate decision rule:
+}
+\details{
+Two groups:
+(1) Normal + equal variance    -> Student's t-test
+(2) Normal + unequal variance  -> Welch's t-test
+(3) Non-normal                 -> Mann-Whitney U test
+
+More than two groups:
+(1) Normal AND homogeneous variance   -> one-way ANOVA (MuiaovMcomper2)
+(2) Normal BUT heterogeneous variance -> Welch's ANOVA (MuiWelchAov)
+(3) Non-normal                        -> Kruskal-Wallis + Wilcoxon (MuiKwWlx2)
 }
 \examples{
 # data(data_wt)
-result = MuiStat(data = data_wt, num = c(4,5,6), method_cv = "leveneTest",
-                 method_Mc = "Tukey", sig_show = "abc", ncol = 2,
-                 plot = "boxbar", plottype = "mui")
+result = MuiStat(data = data_wt, num = c(4,5,6), sig_show = "abc",
+                 ncol = 2, plot = "boxbar", plottype = "mui")
 result[[1]]
-# Variables routed to ANOVA
-result$aov
-# Variables routed to Welch's ANOVA
-result$welch
-# Variables routed to Kruskal-Wallis / Wilcoxon
-result$wlx
-}
-\references{
-Yuan J, Zhao J, Wen T, Zhao M, Li R, Goossens P, Huang Q, Bai Y, Vivanco JM,
-Kowalchuk GA, Berendsen RL, Shen Q
-Root exudates drive the soil-borne legacy of aboveground pathogen infection
-Microbiome 2018, DOI: \url{doi: 10.1186/s40168-018-0537-x}
+result$aov; result$welch; result$wlx
 }
 \author{
 Contact: Tao Wen \email{2018203048@njau.edu.cn} Jun Yuan \email{junyuan@njau.edu.cn}
