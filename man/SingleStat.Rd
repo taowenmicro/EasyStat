@@ -2,52 +2,56 @@
 % Please edit documentation in R/SingleStat.R
 \name{SingleStat}
 \alias{SingleStat}
-\title{A complete single-factor difference analysis process for single col data, including normal test,
-homogeneity analysis of variance, selection of variance analysis or non-parametric test,
-selection of candidate visualization method.}
+\title{A complete single-factor difference analysis process for single col data.}
 \usage{
 SingleStat(
   data = data_wt,
   plot = "bar",
   method_Mc = "Tukey",
   i = 4,
-  sig_show = "abc"
+  sig_show = "abc",
+  p.adjust.method = "none"
 )
 }
 \arguments{
-\item{data}{a data.frame; first column is sample ID, second column is group (must be named "group"),
-subsequent columns are response variables.}
+\item{data}{a data.frame; first column is sample ID, second column is group
+(must be named "group"), subsequent columns are response variables.}
 
-\item{plot}{plot type: "bar", "box", or "boxbar"}
+\item{plot}{plot type: "bar", "box", or "boxbar".}
 
-\item{method_Mc}{method for ANOVA post-hoc comparison: "Tukey", "LSD", "SNK", "Duncan", "scheffe"}
+\item{method_Mc}{post-hoc method for ANOVA: "Tukey","LSD","SNK","Duncan","scheffe".}
 
-\item{i}{col index or column name of the variable to test}
+\item{i}{col index or column name of the variable to test.}
 
-\item{sig_show}{significance display format: "abc" or "line"}
+\item{sig_show}{significance display: "abc" or "line".}
+
+\item{p.adjust.method}{p-value adjustment for non-parametric tests. Default "none".}
 }
 \value{
-list: [[1]] plot; $table CLD result; $method character string of method used
+list: [[1]] plot; $table CLD data.frame; $method character
 }
 \description{
-The function implements a three-path decision rule:
-(1) Normal distribution AND homogeneity of variance -> one-way ANOVA (aovMcomper2)
-(2) Normal distribution BUT heterogeneous variance  -> Welch's ANOVA (WelchAov)
-(3) Non-normal distribution (regardless of variance) -> Kruskal-Wallis + Wilcoxon (KwWlx2)
+First checks number of groups, then applies the appropriate decision rule:
+}
+\details{
+Two groups:
+(1) Normal + equal variance    -> Student's t-test
+(2) Normal + unequal variance  -> Welch's t-test
+(3) Non-normal                 -> Mann-Whitney U test
+
+More than two groups:
+(1) Normal AND homogeneous variance   -> one-way ANOVA (aovMcomper2)
+(2) Normal BUT heterogeneous variance -> Welch's ANOVA (WelchAov)
+(3) Non-normal                        -> Kruskal-Wallis + Wilcoxon (KwWlx2)
 }
 \examples{
 # data(data_wt)
-result = SingleStat(data = data_wt, plot = "boxbar", method_Mc = "Tukey", i = 4, sig_show = "abc")
+result = SingleStat(data = data_wt, i = 4, plot = "boxbar",
+                    method_Mc = "Tukey", sig_show = "abc")
 result[[1]]
-result[[2]]   # CLD table
-result[[3]]   # method used: "aov", "welch", or "wlx"
-}
-\references{
-Yuan J, Zhao J, Wen T, Zhao M, Li R, Goossens P, Huang Q, Bai Y, Vivanco JM,
-Kowalchuk GA, Berendsen RL, Shen Q
-Root exudates drive the soil-borne legacy of aboveground pathogen infection
-Microbiome 2018, DOI: \url{doi: 10.1186/s40168-018-0537-x}
+result$table   # CLD result
+result$method  # method chosen: "aov","welch_anova","wlx","t_equal","t_welch","mannwhitney"
 }
 \author{
-Contact: Tao Wen \email{2018203048@njau.edu.cn} Jun Yuan \email{junyuan@njau.edu.cn}
+Contact: Tao Wen \email{2018203048@njau.edu.cn}
 }

@@ -4,7 +4,13 @@
 \alias{NorNorCVTest}
 \title{Test normality and homogeneity of variance of Input data}
 \usage{
-NorNorCVTest(data = data_wt, i = 4, method_cv = "leveneTest", ...)
+NorNorCVTest(
+  data = data_wt,
+  i = 4,
+  method_cv = "leveneTest",
+  normality_adjust = c("none", "bonferroni"),
+  ...
+)
 }
 \arguments{
 \item{data}{a data.frame contain the input data}

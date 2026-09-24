@@ -24,7 +24,9 @@
 ## ---------------------第一部分----------------多组数据正态分布和方差齐性分析
 # num = c(4,6)
 # N =4
-MuiNorCV = function(data = data_wt,num = c(4:6),method_cv = "leveneTest"){
+MuiNorCV = function(data = data_wt,num = c(4:6),method_cv = "leveneTest",
+                    normality_adjust = c("none","bonferroni")){
+  normality_adjust <- match.arg(normality_adjust)
   data_wt = data
   s1 = rep("A",length(num))
   s2 = rep("A",length(num))
@@ -32,11 +34,15 @@ MuiNorCV = function(data = data_wt,num = c(4:6),method_cv = "leveneTest"){
   i = 1
   for (N in num) {
 
-    resul = NorNorCVTest(data = data_wt, i= N ,method_cv = "leveneTest")
+    # method_cv is now passed through instead of being hard-coded
+    resul = NorNorCVTest(data = data_wt, i= N ,method_cv = method_cv,
+                         normality_adjust = normality_adjust)
     a = resul[[1]]
     b = resul[[2]]
     name = colnames(data_wt[N])
-    a1 = length(a$p.value[-dim(a)[1]][!a$p.value[-dim(a)[1]] >= 0.05]) == 0
+    # use the per-group verdict computed by NorNorCVTest so that the
+    # significance level (plain or Bonferroni-adjusted) is applied in one place
+    a1 = all(a$norm.test[-dim(a)[1]] == "Norm")
     b1 = b >=.05
     s1[i] = a1
     s2[i] = b1

@@ -1,25 +1,50 @@
 Package: EasyStat
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Automated Statistical Decision and Visualization Workflow for
+    Multi-Variable Differential Analysis
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Author: Tao Wen, Xinyang Teng, Jun Yuan
+Maintainer: Tao Wen <taowen@njau.edu.cn>
+Description: An automated workflow for between-group differential analysis of
+    many variables at once. For each variable the package tests normality and
+    homogeneity of variance, routes it to one-way ANOVA, Welch's ANOVA or the
+    Kruskal-Wallis test accordingly, runs the matching post-hoc procedure, and
+    returns compact-letter annotations in a standardised result object.
+    Omnibus p-values from all variables analysed in one call are corrected
+    jointly by the Benjamini-Hochberg procedure, and post-hoc comparisons are
+    computed only for variables that pass the threshold. Plotting functions
+    consume the same result object, so statistics and figures stay consistent.
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.3
-Imports:
-	dplyr,
-	tidyr,
-	multcomp,
-	agricolae,
-	ggpubr,
-	multcompView,
-	reshape2,
-	plyr,
-             rstatix,
-	aplot
 URL: https://github.com/taowenmicro/EasyStat
 BugReports: https://github.com/taowenmicro/EasyStat/issues
+Imports:
+    ggplot2,
+    dplyr,
+    tidyr,
+    multcomp,
+    agricolae,
+    ggpubr,
+    multcompView,
+    reshape2,
+    plyr,
+    rstatix,
+    aplot,
+    magrittr,
+    tibble,
+    purrr,
+    stringr,
+    rlang,
+    car,
+    RColorBrewer,
+    ggalluvial,
+    ggsignif,
+    ggtree,
+    stats,
+    utils,
+    grDevices
+Suggests:
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
